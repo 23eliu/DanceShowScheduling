@@ -17,21 +17,23 @@ public class Main {
 
     public static void main(String[] args) {
         List<Dance> dancesList = new ArrayList<>();
-
+        String[] test = new String[100];
+        
         // scanning dances data
         try (BufferedReader br = new BufferedReader(new FileReader("data/dances1.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // getting dances in array
+                // getting name of dances in array
                 String[] values = line.split(",");
 
-                // adding new dancer to master list
+                // adding new dancer to master list with name, empty arrayList, empty dancer list
                 Dance d = new Dance(values[0], new ArrayList<Dancer>(), values[1]);
                 dancesList.add(d);
 
                 // adding dances to hashMap
-                danceStringHashMap.put(d.name, d);
-                System.out.println(danceStringHashMap.get(d.name).name);
+                danceStringHashMap.put(values[0], d);
+//                System.out.println("name tested = " + d.name);
+//                System.out.println("name got = " + danceStringHashMap.get(d.name).name);
             }
         } catch (FileNotFoundException e) {
             System.err.println("Unable to find input csv");
@@ -53,13 +55,15 @@ public class Main {
 
                 // creating dances list in dancer
                 ArrayList<Dance> list = new ArrayList<Dance>();
+//                System.out.println("start dances in dancer: ");
                 for (String name : dances) {
-//                    Dance dance = danceStringHashMap.get(name);
-//                    if (dance == null) {
-//                        System.out.println(name);
-//                    }
-//                    System.out.println(dance.name);
-//                    list.add(dance);
+//                    System.out.println("name tested = " + name);
+                    Dance dance = danceStringHashMap.get(name);
+//                    System.out.println("name got = " + danceStringHashMap.get(name).name);
+                    if (dance == null) {
+//                        System.out.println("null = " + name);
+                    }
+                    list.add(dance);
                 }
 
                 // adding new dancer to master list and HashMap
@@ -67,17 +71,15 @@ public class Main {
                 dancerList.add(d);
                 dancerStringHashMap.put(d.name, d);
 
-//                for (Dance listObject : list) {
-//                    if (listObject == null) {
-//                        System.out.println("null");
-//                    }
-//                    else {
-//                        System.out.println(listObject.name);
-//                        System.out.println(listObject);
-//                        // adding new dancer to list of dancers in a given dance
-//                        listObject.dancers.add(d);
-//                    }
-//                }
+//                System.out.println("start dancer in dance: ");
+                for (Dance listObject : list) {
+                    if (listObject == null) {
+//                        System.out.println("null" + listObject);
+                    }
+                    else {
+                        listObject.dancers.add(d);
+                    }
+                }
             }
         } catch (FileNotFoundException e) {
             System.err.println("Unable to find input csv");
@@ -87,8 +89,21 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-//        printDancerList(dancerList);
-//        printDancesList(dancesList);
+        // START ALGORITHM CODE
+        int numShows = dancesList.size()/14;
+        Dance[] lineup = new Dance[dancesList.size()];
+
+        ArrayList<Integer> ints = new ArrayList<Integer>();
+        for (Dance d : dancesList) {
+            int rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
+            while (ints.contains(rand)) {
+                rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
+                if (!ints.contains(rand)) {
+                    ints.add(rand);
+                    lineup[rand] = d;
+                }
+            }
+        }
     }
 
     // prints dancers and their info
@@ -145,10 +160,10 @@ public class Main {
 
     static class Show {
         int num;
-        List<Dance> lineup;
+        int[] lineup;
         int size;
 
-        public Show(int num, List<Dance> lineup) {
+        public Show(int num, int[] lineup) {
             this.num = num;
             this.lineup = lineup;
         }
