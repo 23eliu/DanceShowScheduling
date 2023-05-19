@@ -32,8 +32,6 @@ public class Main {
 
                 // adding dances to hashMap
                 danceStringHashMap.put(values[0], d);
-//                System.out.println("name tested = " + d.name);
-//                System.out.println("name got = " + danceStringHashMap.get(d.name).name);
             }
         } catch (FileNotFoundException e) {
             System.err.println("Unable to find input csv");
@@ -55,14 +53,8 @@ public class Main {
 
                 // creating dances list in dancer
                 ArrayList<Dance> list = new ArrayList<Dance>();
-//                System.out.println("start dances in dancer: ");
                 for (String name : dances) {
-//                    System.out.println("name tested = " + name);
-                    Dance dance = danceStringHashMap.get(name);
-//                    System.out.println("name got = " + danceStringHashMap.get(name).name);
-                    if (dance == null) {
-//                        System.out.println("null = " + name);
-                    }
+                    Dance dance = danceStringHashMap.get(name.trim());
                     list.add(dance);
                 }
 
@@ -71,14 +63,8 @@ public class Main {
                 dancerList.add(d);
                 dancerStringHashMap.put(d.name, d);
 
-//                System.out.println("start dancer in dance: ");
                 for (Dance listObject : list) {
-                    if (listObject == null) {
-//                        System.out.println("null" + listObject);
-                    }
-                    else {
-                        listObject.dancers.add(d);
-                    }
+                    listObject.dancers.add(d);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -89,18 +75,31 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        // START ALGORITHM CODE
+//        // START ALGORITHM CODE
         int numShows = dancesList.size()/14;
         Dance[] lineup = new Dance[dancesList.size()];
 
         ArrayList<Integer> ints = new ArrayList<Integer>();
+        // Initial assignments: assigning all dances to a random place in the lineup
         for (Dance d : dancesList) {
             int rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
             while (ints.contains(rand)) {
                 rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
-                if (!ints.contains(rand)) {
-                    ints.add(rand);
-                    lineup[rand] = d;
+            }
+            ints.add(rand);
+            lineup[rand] = d;
+        }
+
+        // performing switches randomly
+        for (int i = 0; i < 1000; i++) {
+            int r1 = (int) (Math.random() * dancesList.size());
+            int r2 = (int) (Math.random() * dancesList.size());
+
+            Dance dance1 = lineup[r1];
+            Dance dance2 = lineup[r2];
+
+            for (Dancer d : dance1.dancers) {
+                if (lineup[r1 - 1].dancers.contains(d)) {
                 }
             }
         }
@@ -130,6 +129,13 @@ public class Main {
             }
             System.out.println();
             count++;
+        }
+    }
+
+    public static void printLineup(Dance[] lineup) {
+        System.out.println("Lineup: ");
+        for (int i = 0; i < lineup.length; i++) {
+            System.out.println(i + ". " + lineup[i].name);
         }
     }
 
