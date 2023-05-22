@@ -72,10 +72,34 @@ public class Main {
         }
 
         // START ALGORITHM CODE
-        int numShows = dancesList.size()/14;
-        Dance[] lineup = new Dance[dancesList.size()];
+        // deciding where the mini show splits are
+        dancesList.remove(danceStringHashMap.get("SL P"));
+        dancesList.remove(danceStringHashMap.get("Jr Musical Theater"));
+        int numShows = (dancesList.size())/12;
+        int leftover = (dancesList.size())%12;
+        Dance[] lineup = new Dance[dancesList.size() + (numShows*2)];
 
+        // setting the opening and closing shows
         ArrayList<Integer> ints = new ArrayList<Integer>();
+        int cutOff = 14 + (leftover/numShows);
+        for (int i = 0; i < lineup.length; i += cutOff) {
+            ints.add(i);
+            ints.add(i + cutOff - 1);
+            lineup[i] = danceStringHashMap.get("Jr Musical Theater");
+            if (i + cutOff >= lineup.length) {
+                lineup[lineup.length-1] = danceStringHashMap.get("SL P");
+            }
+            else {
+                lineup[i + cutOff - 1] = danceStringHashMap.get("SL P");
+            }
+        }
+
+        for (int i = 0; i < ints.size(); i++) {
+            System.out.println(ints.get(i));
+        }
+
+        System.out.println("test");
+
         // Initial assignments: assigning all dances to a random place in the lineup
         for (Dance d : dancesList) {
             int rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
@@ -87,23 +111,29 @@ public class Main {
         }
 
         // performing switches randomly
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 10; i++) {
             // getting and generating random dances
             int r1 = (int) (Math.random() * dancesList.size());
             int r2 = (int) (Math.random() * dancesList.size());
             Dance dance1 = lineup[r1];
             Dance dance2 = lineup[r2];
+            // ensuring it's not an opening/closing dance
+            while (dance1 == danceStringHashMap.get("SL P") || dance1 == danceStringHashMap.get("Jr Musical Theater")) {
+                r1 = (int) (Math.random() * dancesList.size());
+                r2 = (int) (Math.random() * dancesList.size());
+                dance1 = lineup[r1];
+            }
+            while (dance2 == danceStringHashMap.get("SL P") || dance2 == danceStringHashMap.get("Jr Musical Theater")) {
+                r2 = (int) (Math.random() * dancesList.size());
+                dance2 = lineup[r2];
+            }
 
             // getting arraylist dancers who have back to backs in each dance
             ArrayList<Dancer> btb1 = checkBackToBacks(dance1, r1, lineup, dancesList);
             ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup, dancesList);
 
             // deciding switches
-            // if neither dances have back to backs
-            if (btb1 == null && btb2 == null) {
-                continue;
-            }
-            else if (checkBackToBacks(dance1, r2, lineup, dancesList) == null && checkBackToBacks(dance2, r1, lineup, dancesList) == null) {
+            if (checkBackToBacks(dance1, r2, lineup, dancesList) == null && checkBackToBacks(dance2, r1, lineup, dancesList) == null) {
                 // SWITCH
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
@@ -112,6 +142,16 @@ public class Main {
         }
 
         printLineup(lineup);
+
+        System.out.println("CHECKING BTBS----------");
+        for (int i = 0; i < lineup.length; i++) {
+            ArrayList<Dancer> btb = checkBackToBacks(lineup[i], i, lineup, dancesList);
+            System.out.print(lineup[i].name + ": ");
+            for (Dancer d : btb) {
+                System.out.print(d.name + ", ");
+            }
+            System.out.println();
+        }
     }
 
     // prints dancers and their info
@@ -144,7 +184,12 @@ public class Main {
     public static void printLineup(Dance[] lineup) {
         System.out.println("Lineup: ");
         for (int i = 0; i < lineup.length; i++) {
-            System.out.println(i + ". " + lineup[i].name);
+            if (lineup[i] == null) {
+                System.out.println("Dance not found: " + lineup[i]);
+            }
+            else {
+                System.out.println(i + ". " + lineup[i].name);
+            }
         }
     }
 
