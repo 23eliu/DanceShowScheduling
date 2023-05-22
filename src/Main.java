@@ -8,15 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Main {
-    // would like to make these lists accessible in main method
-    static List<Dance> dancesList;
-    static List<Dancer> dancerList;
-
     static HashMap<String, Dance> danceStringHashMap = new HashMap();
     static HashMap<String, Dancer> dancerStringHashMap = new HashMap();
 
     public static void main(String[] args) {
-        List<Dance> dancesList = new ArrayList<>();
+        ArrayList<Dance> dancesList = new ArrayList<>();
         String[] test = new String[100];
         
         // scanning dances data
@@ -75,7 +71,7 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-//        // START ALGORITHM CODE
+        // START ALGORITHM CODE
         int numShows = dancesList.size()/14;
         Dance[] lineup = new Dance[dancesList.size()];
 
@@ -91,18 +87,31 @@ public class Main {
         }
 
         // performing switches randomly
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10000; i++) {
+            // getting and generating random dances
             int r1 = (int) (Math.random() * dancesList.size());
             int r2 = (int) (Math.random() * dancesList.size());
-
             Dance dance1 = lineup[r1];
             Dance dance2 = lineup[r2];
 
-            for (Dancer d : dance1.dancers) {
-                if (lineup[r1 - 1].dancers.contains(d)) {
-                }
+            // getting arraylist dancers who have back to backs in each dance
+            ArrayList<Dancer> btb1 = checkBackToBacks(dance1, r1, lineup, dancesList);
+            ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup, dancesList);
+
+            // deciding switches
+            // if neither dances have back to backs
+            if (btb1 == null && btb2 == null) {
+                continue;
             }
+            else if (checkBackToBacks(dance1, r2, lineup, dancesList) == null && checkBackToBacks(dance2, r1, lineup, dancesList) == null) {
+                // SWITCH
+                lineup[r1] = dance2;
+                lineup[r2] = dance1;
+            }
+            // if switching does not fix both dances, no change
         }
+
+        printLineup(lineup);
     }
 
     // prints dancers and their info
@@ -119,7 +128,7 @@ public class Main {
     }
 
     // prints dances and their info
-    public static void printDancesList(List<Dance> list) {
+    public static void printDancesList(ArrayList<Dance> list) {
         int count = 1;
         for (Dance d : list) {
             System.out.print(count + ". " + d.name + " (" + d.category + ", " + d.size + ") ");
@@ -137,6 +146,31 @@ public class Main {
         for (int i = 0; i < lineup.length; i++) {
             System.out.println(i + ". " + lineup[i].name);
         }
+    }
+
+    public static ArrayList<Dancer> checkBackToBacks(Dance dance, int position, Dance[] lineup, ArrayList<Dance> dancesList) {
+        ArrayList<Dancer> backToBacks = new ArrayList<>();
+        for (Dancer d : dance.dancers) {
+            // r1 is first dance
+            if (position == 0) {
+                if (lineup[position+1].dancers.contains(d)) {
+                    backToBacks.add(d);
+                }
+            }
+            // r1 is last dance
+            else if (position == dancesList.size()-1) {
+                if (lineup[position-1].dancers.contains(d)) {
+                    backToBacks.add(d);
+                }
+            }
+            // r1 is not first or last dance
+            else {
+                if (lineup[position-1].dancers.contains(d) || lineup[position+1].dancers.contains(d)) {
+                    backToBacks.add(d);
+                }
+            }
+        }
+        return backToBacks;
     }
 
     static class Dancer {
