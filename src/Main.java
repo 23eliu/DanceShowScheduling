@@ -105,10 +105,35 @@ public class Main {
         }
 
         // performing switches randomly
+        boolean keep1 = false;
+        boolean keep2 = false;
+        int r1 = (int) (Math.random() * dancesList.size());
+        int r2 = (int) (Math.random() * dancesList.size());
         for (int i = 0; i < 1000000; i++) {
+            // if from last loop, you are supposed to keep
+            if (keep1) {
+                int k = (int) (Math.random() * 99);
+                if (k >= 95) {
+                    r1 = (int) (Math.random() * dancesList.size());
+                    r2 = (int) (Math.random() * dancesList.size());
+                }
+                else {
+                    r2 = (int) (Math.random() * dancesList.size());
+                }
+            }
+
+            if (keep2) {
+                int k = (int) (Math.random() * 99);
+                if (k >= 95) {
+                    r2 = (int) (Math.random() * dancesList.size());
+                    r1 = (int) (Math.random() * dancesList.size());
+                }
+                else {
+                    r1 = (int) (Math.random() * dancesList.size());
+                }
+            }
+
             // getting and generating random dances
-            int r1 = (int) (Math.random() * dancesList.size());
-            int r2 = (int) (Math.random() * dancesList.size());
             Dance dance1 = lineup[r1];
             Dance dance2 = lineup[r2];
             // ensuring it's not an opening/closing dance
@@ -122,38 +147,82 @@ public class Main {
             }
 
             // getting arraylist dancers who have back to backs in each dance
-            ArrayList<Dancer> btb1 = checkBackToBacks(dance1, r1, lineup, dancesList);
-            ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup, dancesList);
+            ArrayList<Dancer> btb1 = checkBackToBacks(dance1, r1, lineup);
+            ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup);
 
             // deciding switches
-            // if switching fixes the problem then SWITCH
-            if (checkBackToBacks(dance1, r2, lineup, dancesList) == null && checkBackToBacks(dance2, r1, lineup, dancesList) == null) {
+            // if it fixes the problems SWITCH
+            if (btb1.isEmpty() && btb2.isEmpty()) {
+                System.out.println(r1);
+                System.out.println("continued");
+                continue;
+            }
+
+            if (checkBackToBacks(dance1, r2, lineup).isEmpty() && checkBackToBacks(dance2, r1, lineup).isEmpty()) {
+                System.out.println("FIRST REACHED");
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
+                keep1 = false;
+                keep2 = false;
             }
-            // if switching does not fix either problems then SWITCH
-            else if (checkBackToBacks(dance1, r2, lineup, dancesList) != null && checkBackToBacks(dance2, r1, lineup, dancesList) != null) {
-                lineup[r1] = dance2;
-                lineup[r2] = dance1;
+
+
+            // if switching doesn't make sense and one has a problem and one does not
+            // then 95% chance to pick the dance that does have a conflict in the next round
+            else if (btb1.isEmpty() && !btb2.isEmpty()) {
+                System.out.println("keep2 reached");
+                keep2 = true;
+                keep1 = false;
             }
+            else if (!btb1.isEmpty() && btb2.isEmpty()) {
+                System.out.println("keep1 reached");
+                keep1 = true;
+                keep2 = false;
+            }
+
             // if switching does makes the amount of dancers with btbs less then SWITCH
-            else if (checkBackToBacks(dance1, r2, lineup, dancesList).size() <  btb1.size() || checkBackToBacks(dance2, r1, lineup, dancesList).size() <  btb2.size()) {
+            else if (checkBackToBacks(dance1, r2, lineup).size() <  btb1.size() || checkBackToBacks(dance2, r1, lineup).size() <  btb2.size()) {
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
+                keep1 = false;
+                keep2 = false;
+            }
+
+            // if dance 1 and its current next is competitive then SWITCH
+            else if (dance1.category.equals("competitive") && dance2.category.equals("competitive")) {
+                lineup[r1] = dance2;
+                lineup[r2] = dance1;
+                keep1 = false;
+                keep2 = false;
+            }
+
+            // if switching does not fix either problems then SWITCH
+            else if (checkBackToBacks(dance1, r2, lineup).size() == btb1.size() && checkBackToBacks(dance2, r1, lineup).size() == btb2.size()) {
+                lineup[r1] = dance2;
+                lineup[r2] = dance1;
+                keep1 = false;
+                keep2 = false;
             }
         }
-        // need to update algorithm more...
+
+//        if no conflict = 90% chance to choose again
         printLineup(lineup);
 
         System.out.println("CHECKING BTBS----------");
         for (int i = 0; i < lineup.length; i++) {
-            ArrayList<Dancer> btb = checkBackToBacks(lineup[i], i, lineup, dancesList);
+            ArrayList<Dancer> btb = checkBackToBacks(lineup[i], i, lineup);
             System.out.print(lineup[i].name + ": ");
             for (Dancer d : btb) {
                 System.out.print(d.name + ", ");
             }
             System.out.println();
         }
+
+        int count = 0;
+        for (int i = 0; i < lineup.length; i++) {
+            count += checkBackToBacks(lineup[i], i, lineup).size();
+        }
+        System.out.println("total = " + count);
     }
 
     // prints dancers and their info
@@ -195,7 +264,7 @@ public class Main {
         }
     }
 
-    public static ArrayList<Dancer> checkBackToBacks(Dance dance, int position, Dance[] lineup, ArrayList<Dance> dancesList) {
+    public static ArrayList<Dancer> checkBackToBacks(Dance dance, int position, Dance[] lineup) {
         ArrayList<Dancer> backToBacks = new ArrayList<>();
         for (Dancer d : dance.dancers) {
             // r1 is first dance
