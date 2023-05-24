@@ -142,6 +142,7 @@ public class Main {
                 lineup[r2] = dance1;
             }
         }
+        // need to update algorithm more...
         printLineup(lineup);
 
         System.out.println("CHECKING BTBS----------");
