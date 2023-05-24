@@ -94,24 +94,18 @@ public class Main {
             }
         }
 
-        for (int i = 0; i < ints.size(); i++) {
-            System.out.println(ints.get(i));
-        }
-
-        System.out.println("test");
-
         // Initial assignments: assigning all dances to a random place in the lineup
         for (Dance d : dancesList) {
-            int rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
+            int rand = (int) (Math.random() * lineup.length);
             while (ints.contains(rand)) {
-                rand = (int) (Math.random() * (dancesList.size() - 0)) + 0;
+                rand = (int) (Math.random() * lineup.length);
             }
             ints.add(rand);
             lineup[rand] = d;
         }
 
         // performing switches randomly
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000000; i++) {
             // getting and generating random dances
             int r1 = (int) (Math.random() * dancesList.size());
             int r2 = (int) (Math.random() * dancesList.size());
@@ -120,7 +114,6 @@ public class Main {
             // ensuring it's not an opening/closing dance
             while (dance1 == danceStringHashMap.get("SL P") || dance1 == danceStringHashMap.get("Jr Musical Theater")) {
                 r1 = (int) (Math.random() * dancesList.size());
-                r2 = (int) (Math.random() * dancesList.size());
                 dance1 = lineup[r1];
             }
             while (dance2 == danceStringHashMap.get("SL P") || dance2 == danceStringHashMap.get("Jr Musical Theater")) {
@@ -133,14 +126,22 @@ public class Main {
             ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup, dancesList);
 
             // deciding switches
+            // if switching fixes the problem then SWITCH
             if (checkBackToBacks(dance1, r2, lineup, dancesList) == null && checkBackToBacks(dance2, r1, lineup, dancesList) == null) {
-                // SWITCH
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
             }
-            // if switching does not fix both dances, no change
+            // if switching does not fix either problems then SWITCH
+            else if (checkBackToBacks(dance1, r2, lineup, dancesList) != null && checkBackToBacks(dance2, r1, lineup, dancesList) != null) {
+                lineup[r1] = dance2;
+                lineup[r2] = dance1;
+            }
+            // if switching does makes the amount of dancers with btbs less then SWITCH
+            else if (checkBackToBacks(dance1, r2, lineup, dancesList).size() <  btb1.size() || checkBackToBacks(dance2, r1, lineup, dancesList).size() <  btb2.size()) {
+                lineup[r1] = dance2;
+                lineup[r2] = dance1;
+            }
         }
-
         printLineup(lineup);
 
         System.out.println("CHECKING BTBS----------");
@@ -203,7 +204,7 @@ public class Main {
                 }
             }
             // r1 is last dance
-            else if (position == dancesList.size()-1) {
+            else if (position == lineup.length-1) {
                 if (lineup[position-1].dancers.contains(d)) {
                     backToBacks.add(d);
                 }
