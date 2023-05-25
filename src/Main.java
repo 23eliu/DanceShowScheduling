@@ -133,7 +133,9 @@ public class Main {
         for (int i = 0; i < lineup.length; i++) {
             count += checkBackToBacks(lineup[i], i, lineup).size();
         }
-        System.out.println("INITIAL total = " + count);
+
+        // Prints out how many back to backs there are after the random assignment
+        // System.out.println("INITIAL total = " + count);
 
         // performing switches randomly
         boolean keep1 = false;
@@ -238,6 +240,8 @@ public class Main {
 
         printLineup(lineup);
 
+        /*
+        // Test to check how many back to backs in final lineup, prints how many back to backs each dance has
         System.out.println("CHECKING BTBS----------");
         for (int i = 0; i < lineup.length; i++) {
             ArrayList<Dancer> btb = checkBackToBacks(lineup[i], i, lineup);
@@ -248,11 +252,13 @@ public class Main {
             System.out.println();
         }
 
+        // Prints out the total amount of conflicts in the final lineup
         count = 0;
         for (int i = 0; i < lineup.length; i++) {
             count += checkBackToBacks(lineup[i], i, lineup).size();
         }
         System.out.println("total = " + count);
+         */
     }
 
     // prints dancers and their info
@@ -283,13 +289,14 @@ public class Main {
     }
 
     public static void printLineup(Dance[] lineup) {
-        System.out.println("Lineup: ");
+        System.out.println("LINEUP");
+        System.out.println("Show 1");
+        int n = 2;
         for (int i = 0; i < lineup.length; i++) {
-            if (lineup[i] == null) {
-                System.out.println("Dance not found: " + lineup[i]);
-            }
-            else {
-                System.out.println(i + ". " + lineup[i].name);
+            System.out.println(i + ". " + lineup[i].name);
+            if (lineup[i].name.equals("SL P") && i != lineup.length-1) {
+                System.out.println("Show " + n);
+                n++;
             }
         }
     }
