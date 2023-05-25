@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,21 +94,53 @@ public class Main {
         }
 
         // Initial assignments: assigning all dances to a random place in the lineup
+        // adding competitive to only odd slots
         for (Dance d : dancesList) {
             int rand = (int) (Math.random() * lineup.length);
-            while (ints.contains(rand)) {
-                rand = (int) (Math.random() * lineup.length);
+            if (d.category.equals("competitive")) {
+                while (ints.contains(rand) || rand%2 != 1) {
+                    rand = (int) (Math.random() * lineup.length);
+                }
+                ints.add(rand);
+                lineup[rand] = d;
             }
-            ints.add(rand);
-            lineup[rand] = d;
         }
+
+        // adding recreational to everything else
+        for (Dance d : dancesList) {
+            int rand = (int) (Math.random() * lineup.length);
+            if (d.category.equals("recreational")) {
+                while (ints.contains(rand)) {
+                    rand = (int) (Math.random() * lineup.length);
+                }
+                ints.add(rand);
+                lineup[rand] = d;
+            }
+        }
+//        printLineup(lineup);
+
+//        System.out.println("CHECKING BTBS----------");
+//        for (int i = 0; i < lineup.length; i++) {
+//            ArrayList<Dancer> btb = checkBackToBacks(lineup[i], i, lineup);
+//            System.out.print(lineup[i].name + ": ");
+//            for (Dancer d : btb) {
+//                System.out.print(d.name + ", ");
+//            }
+//            System.out.println();
+//        }
+
+        int count = 0;
+        for (int i = 0; i < lineup.length; i++) {
+            count += checkBackToBacks(lineup[i], i, lineup).size();
+        }
+        System.out.println("INITIAL total = " + count);
 
         // performing switches randomly
         boolean keep1 = false;
         boolean keep2 = false;
         int r1 = (int) (Math.random() * dancesList.size());
         int r2 = (int) (Math.random() * dancesList.size());
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 100000000; i++) {
             // if from last loop, you are supposed to keep
             if (keep1) {
                 int k = (int) (Math.random() * 99);
@@ -121,8 +152,7 @@ public class Main {
                     r2 = (int) (Math.random() * dancesList.size());
                 }
             }
-
-            if (keep2) {
+            else if (keep2) {
                 int k = (int) (Math.random() * 99);
                 if (k >= 95) {
                     r2 = (int) (Math.random() * dancesList.size());
@@ -132,19 +162,26 @@ public class Main {
                     r1 = (int) (Math.random() * dancesList.size());
                 }
             }
+            else {
+                // getting and generating random dances
+                Dance dance1 = lineup[r1];
+                Dance dance2 = lineup[r2];
+                r1 = (int) (Math.random() * dancesList.size());
+                r2 = (int) (Math.random() * dancesList.size());
+                // ensuring it's not an opening/closing dance
+                while (dance1 == danceStringHashMap.get("SL P") || dance1 == danceStringHashMap.get("Jr Musical Theater")) {
+                    r1 = (int) (Math.random() * dancesList.size());
+                    dance1 = lineup[r1];
+                }
+                while (dance2 == danceStringHashMap.get("SL P") || dance2 == danceStringHashMap.get("Jr Musical Theater")) {
+                    r2 = (int) (Math.random() * dancesList.size());
+                    dance2 = lineup[r2];
+                }
+            }
 
             // getting and generating random dances
             Dance dance1 = lineup[r1];
             Dance dance2 = lineup[r2];
-            // ensuring it's not an opening/closing dance
-            while (dance1 == danceStringHashMap.get("SL P") || dance1 == danceStringHashMap.get("Jr Musical Theater")) {
-                r1 = (int) (Math.random() * dancesList.size());
-                dance1 = lineup[r1];
-            }
-            while (dance2 == danceStringHashMap.get("SL P") || dance2 == danceStringHashMap.get("Jr Musical Theater")) {
-                r2 = (int) (Math.random() * dancesList.size());
-                dance2 = lineup[r2];
-            }
 
             // getting arraylist dancers who have back to backs in each dance
             ArrayList<Dancer> btb1 = checkBackToBacks(dance1, r1, lineup);
@@ -153,29 +190,23 @@ public class Main {
             // deciding switches
             // if it fixes the problems SWITCH
             if (btb1.isEmpty() && btb2.isEmpty()) {
-                System.out.println(r1);
-                System.out.println("continued");
                 continue;
             }
 
             if (checkBackToBacks(dance1, r2, lineup).isEmpty() && checkBackToBacks(dance2, r1, lineup).isEmpty()) {
-                System.out.println("FIRST REACHED");
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
                 keep1 = false;
                 keep2 = false;
             }
 
-
             // if switching doesn't make sense and one has a problem and one does not
             // then 95% chance to pick the dance that does have a conflict in the next round
             else if (btb1.isEmpty() && !btb2.isEmpty()) {
-                System.out.println("keep2 reached");
                 keep2 = true;
                 keep1 = false;
             }
             else if (!btb1.isEmpty() && btb2.isEmpty()) {
-                System.out.println("keep1 reached");
                 keep1 = true;
                 keep2 = false;
             }
@@ -205,7 +236,6 @@ public class Main {
             }
         }
 
-//        if no conflict = 90% chance to choose again
         printLineup(lineup);
 
         System.out.println("CHECKING BTBS----------");
@@ -218,7 +248,7 @@ public class Main {
             System.out.println();
         }
 
-        int count = 0;
+        count = 0;
         for (int i = 0; i < lineup.length; i++) {
             count += checkBackToBacks(lineup[i], i, lineup).size();
         }
