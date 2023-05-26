@@ -190,11 +190,12 @@ public class Main {
             ArrayList<Dancer> btb2 = checkBackToBacks(dance2, r2, lineup);
 
             // deciding switches
-            // if it fixes the problems SWITCH
+            // if there are no problems DON'T switch
             if (btb1.isEmpty() && btb2.isEmpty()) {
                 continue;
             }
 
+            // if it fixes both dances' problems SWITCH
             if (checkBackToBacks(dance1, r2, lineup).isEmpty() && checkBackToBacks(dance2, r1, lineup).isEmpty()) {
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
@@ -213,24 +214,8 @@ public class Main {
                 keep2 = false;
             }
 
-            // if switching does makes the amount of dancers with btbs less then SWITCH
-            else if (checkBackToBacks(dance1, r2, lineup).size() <  btb1.size() || checkBackToBacks(dance2, r1, lineup).size() <  btb2.size()) {
-                lineup[r1] = dance2;
-                lineup[r2] = dance1;
-                keep1 = false;
-                keep2 = false;
-            }
-
-            // if dance 1 and its current next is competitive then SWITCH
-            else if (dance1.category.equals("competitive") && dance2.category.equals("competitive")) {
-                lineup[r1] = dance2;
-                lineup[r2] = dance1;
-                keep1 = false;
-                keep2 = false;
-            }
-
-            // if switching does not fix either problems then SWITCH
-            else if (checkBackToBacks(dance1, r2, lineup).size() == btb1.size() && checkBackToBacks(dance2, r1, lineup).size() == btb2.size()) {
+            // if switching lowers or is equal to current amount of conflicts SWITCH
+            else if (checkBackToBacks(dance1, r2, lineup).size() <=  btb1.size() && checkBackToBacks(dance2, r1, lineup).size() <=  btb2.size()) {
                 lineup[r1] = dance2;
                 lineup[r2] = dance1;
                 keep1 = false;
@@ -251,14 +236,15 @@ public class Main {
             }
             System.out.println();
         }
-
+*/
         // Prints out the total amount of conflicts in the final lineup
         count = 0;
         for (int i = 0; i < lineup.length; i++) {
             count += checkBackToBacks(lineup[i], i, lineup).size();
         }
+
         System.out.println("total = " + count);
-         */
+
     }
 
     // prints dancers and their info
@@ -348,17 +334,6 @@ public class Main {
             this.name = name;
             this.dancers = dancers;
             this.category = category;
-        }
-    }
-
-    static class Show {
-        int num;
-        int[] lineup;
-        int size;
-
-        public Show(int num, int[] lineup) {
-            this.num = num;
-            this.lineup = lineup;
         }
     }
 }
